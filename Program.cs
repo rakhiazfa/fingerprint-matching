@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using Dapper;
 using MySql.Data.MySqlClient;
 using SourceAFIS;
@@ -52,8 +53,8 @@ namespace FingerprintMatching
             Subject match = null;
             double max = Double.NegativeInfinity;
 
-            foreach (var candidate in candidates)
-            {
+            Parallel.ForEach(candidates, candidate => {
+
                 double similarity = matcher.Match(new FingerprintTemplate(candidate.template));
 
                 if (similarity > max) {
@@ -61,7 +62,7 @@ namespace FingerprintMatching
                     max = similarity;
                     match = candidate;
                 }
-            }
+            });
 
             double threshold = 40;
             return max >= threshold ? match : null;
